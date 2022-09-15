@@ -1,7 +1,11 @@
 package main
 
-import "github.com/narayanprusty/average-blocks/tracker"
+import (
+	"github.com/narayanprusty/average-blocks/api"
+	"github.com/narayanprusty/average-blocks/tracker"
+)
 
 func main() {
-	tracker.RunCronJobs()
+	go tracker.RunCronJobs()
+	api.StartAPIServer()
 }
