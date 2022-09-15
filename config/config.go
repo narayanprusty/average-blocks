@@ -1,9 +1,5 @@
 package config
 
-import (
-	"os"
-)
-
 type Configuration struct {
 	BeaconURL        string `mapstructure:"beacon-url"`
 	DatabaseUsername string `mapstructure:"database-username"`
@@ -22,11 +18,4 @@ var Config = Configuration{
 	DatabasePort:     "5455",
 	DatabaseName:     "tracker",
 	JWTSecret:        "secret",
-}
-
-func init() {
-	beaconURL := os.Getenv("BEACON_URL")
-	if beaconURL != "" {
-		Config.BeaconURL = beaconURL
-	}
 }
