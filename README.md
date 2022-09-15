@@ -56,5 +56,42 @@ go build && ./average-blocks
 
 ### Curl Requests for Testing
 
+#### Register 
+
+```
+curl --location --request POST 'http://localhost:8000/register' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "username": "narayan",
+    "password": "password"
+}'
+```
+
+#### Login
+
+```
+curl --location --request POST 'http://localhost:8000/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "username": "narayan",
+    "password": "password"
+}'
+```
+
+#### Generate API Key
+
+```
+curl --location --request GET 'http://localhost:8000/key' \
+--header 'Token: <token>'
+```
+
+
+#### Fetch Rate
+
+```
+curl --location --request GET 'http://localhost:8000/rate' \
+--header 'Api-Key: <api-key>' \
+```
+
 
 
