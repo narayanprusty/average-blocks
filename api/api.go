@@ -2,16 +2,25 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
+	random "math/rand"
 	"net/http"
 	"strings"
 
 	"github.com/narayanprusty/average-blocks/api/auth"
 	"github.com/narayanprusty/average-blocks/db"
+	"github.com/narayanprusty/average-blocks/tracker"
 )
 
 type LoginResponse struct {
 	JWTToken string `json:"jwtToken"`
+}
+
+type APIKeyResponse struct {
+	APIKey string `json:"apiKey"`
+}
+
+type RateResponse struct {
+	Rate int `json:"rate"`
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,5 +91,47 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateKeyHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("success")
+	username := r.Header["Username"][0]
+
+	key := db.APIKey{}
+	user := new(db.User)
+	err := db.DB.Model(user).Where("username = ?", username).Select()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	key.Key = randomString(32)
+	key.UserId = user.Id
+
+	_, err = db.DB.Model(&key).Insert()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(APIKeyResponse{APIKey: key.Key})
+}
+
+func FetchRate(w http.ResponseWriter, r *http.Request) {
+	apiKey := r.Header["Api-Key"][0]
+	keyExists := new(db.APIKey)
+	err := db.DB.Model(keyExists).Where("key = ?", apiKey).Select()
+	if err != nil {
+		http.Error(w, "invalid api key", http.StatusUnauthorized)
+		return
+	}
+
+	rate := tracker.GetRate()
+	json.NewEncoder(w).Encode(RateResponse{Rate: rate})
+}
+
+func randomString(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[random.Intn(len(letters))]
+	}
+	return string(s)
 }

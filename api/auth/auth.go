@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,48 +12,56 @@ import (
 
 func GenerateJWT(username string) (string, error) {
 	signingKey := []byte(config.Config.JWTSecret)
-
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-
 	claims["authorized"] = true
 	claims["username"] = username
-	claims["exp"] = time.Now().Add(60 * time.Minute)
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	tokenString, err := token.SignedString(signingKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func fetchUsername(jwtToken string) (string, error) {
+	var mySigningKey = []byte(config.Config.JWTSecret)
+
+	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("there was an error in parsing token")
+		}
+
+		return mySigningKey, nil
+	})
 
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(tokenString)
-	return tokenString, nil
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return fmt.Sprintf("%v", claims["username"]), nil
+	}
+
+	return "", errors.New("invalid token")
 }
 
 func VerifyJWT(endpointHandler func(writer http.ResponseWriter, request *http.Request)) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header["Token"] == nil {
-			http.Error(w, "Token header not found", http.StatusUnauthorized)
-			return
-		}
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.Header["Token"] != nil {
+			username, err := fetchUsername(request.Header["Token"][0])
 
-		signingKey := []byte(config.Config.JWTSecret)
-		token, err := jwt.Parse(r.Header["Token"][0], func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("there was an error in parsing")
+			if err != nil {
+				http.Error(writer, err.Error(), http.StatusUnauthorized)
+				return
 			}
-			return signingKey, nil
-		})
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			fmt.Println(claims["username"])
-			endpointHandler(w, r)
+			request.Header.Set("Username", username)
+			endpointHandler(writer, request)
 		} else {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(writer, "Token header is missing", http.StatusUnauthorized)
 		}
 	})
 }

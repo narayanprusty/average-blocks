@@ -14,8 +14,10 @@ func StartAPIServer() {
 
 	router.HandleFunc("/register", RegisterHandler).Methods("POST")
 	router.HandleFunc("/login", LoginHandler).Methods("POST")
-	router.HandleFunc("/key", auth.VerifyJWT(CreateKeyHandler)).Methods("POST")
+	router.HandleFunc("/key", auth.VerifyJWT(CreateKeyHandler)).Methods("GET")
+	router.HandleFunc("/rate", FetchRate).Methods("GET")
 
 	fmt.Println("Server at 8080")
 	log.Fatal(http.ListenAndServe(":8000", router))
+
 }

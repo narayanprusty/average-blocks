@@ -51,6 +51,10 @@ func trackBlockHeight() {
 	lastSlotNumber = headSlot
 }
 
+func GetRate() int {
+	return AverageBlocksPerMinute
+}
+
 func RunCronJobs() {
 	s := gocron.NewScheduler(time.UTC)
 	s.Every(1).Minutes().Do(trackBlockHeight)

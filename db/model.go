@@ -1,11 +1,14 @@
 package db
 
 type User struct {
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
+	Id       int64
+	Username string
+	Password string
 }
 
 type APIKey struct {
-	Key  string `mapstructure:"apiKey"`
-	User *User  `mapstructure:"username" pg:"rel:has-one"`
+	Id     int64
+	Key    string
+	UserId int64
+	User   *User `pg:"rel:has-one"`
 }

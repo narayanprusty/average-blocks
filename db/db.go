@@ -20,6 +20,7 @@ func init() {
 
 	models := []interface{}{
 		(*User)(nil),
+		(*APIKey)(nil),
 	}
 
 	for _, model := range models {
