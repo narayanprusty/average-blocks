@@ -11,6 +11,7 @@ type Configuration struct {
 	DatabaseHost     string `mapstructure:"database-host"`
 	DatabasePort     string `mapstructure:"database-port"`
 	DatabaseName     string `mapstructure:"database-name"`
+	JWTSecret        string `mapstructure:"jwt-secret"`
 }
 
 var Config = Configuration{
@@ -20,6 +21,7 @@ var Config = Configuration{
 	DatabaseHost:     "localhost",
 	DatabasePort:     "5455",
 	DatabaseName:     "tracker",
+	JWTSecret:        "secret",
 }
 
 func init() {
