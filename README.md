@@ -38,9 +38,9 @@ docker run -d -v /host/path/ethereum:/root/.ethereum -p 3500:3500 -p 4000:4000 -
   --accept-terms-of-use
 ```
 
-## Start PostgresQL
+## Start PostgreSQL
 
-Use the below command to run PostgresQL
+Use the below command to run PostgreSQL
 
 ```
 docker run -p 5455:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=tracker -d postgres
