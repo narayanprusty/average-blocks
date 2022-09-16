@@ -19,6 +19,8 @@ type Chainhead struct {
 
 var AverageBlocksPerMinute int = 0
 var lastSlotNumber int = 0
+var iterations int = 0
+var totalSlots int = 0
 
 func trackBlockHeight() {
 	resp, err := http.Get(config.Config.BeaconURL + "/eth/v1alpha1/beacon/chainhead")
@@ -44,7 +46,9 @@ func trackBlockHeight() {
 	}
 
 	if lastSlotNumber != 0 {
-		AverageBlocksPerMinute = headSlot - lastSlotNumber
+		totalSlots = totalSlots + (headSlot - lastSlotNumber)
+		iterations++
+		AverageBlocksPerMinute = totalSlots / iterations
 		fmt.Println("set average rate to: " + strconv.Itoa(AverageBlocksPerMinute))
 	}
 
