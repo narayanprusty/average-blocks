@@ -90,7 +90,7 @@ curl --location --request GET 'http://localhost:8000/key' \
 
 ```
 curl --location --request GET 'http://localhost:8000/rate' \
---header 'Api-Key: <api-key>' \
+--header 'Api-Key: <api-key>'
 ```
 
 
