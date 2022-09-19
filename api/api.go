@@ -1,7 +1,9 @@
 package api
 
 import (
+	"crypto/sha1"
 	"encoding/json"
+	"fmt"
 	random "math/rand"
 	"net/http"
 	"strings"
@@ -50,6 +52,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.Password = hashstr(user.Password)
+
 	_, err = db.DB.Model(user).Insert()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -76,6 +80,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	user.Password = hashstr(user.Password)
 
 	if user.Password != userExists.Password {
 		http.Error(w, "invalid credentails", http.StatusBadRequest)
@@ -134,4 +140,12 @@ func randomString(n int) string {
 		s[i] = letters[random.Intn(len(letters))]
 	}
 	return string(s)
+}
+
+func hashstr(Txt string) string {
+	h := sha1.New()
+	h.Write([]byte(Txt))
+	bs := h.Sum(nil)
+	sh := string(fmt.Sprintf("%x\n", bs))
+	return sh
 }
